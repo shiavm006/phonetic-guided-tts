@@ -6,10 +6,10 @@ A small, fully reproducible TTS experiment that asks one question: *if you know 
 phoneme happens, how much of good speech do you get for free, and how much needs a learned acoustic model?*
 
 > **Main result.** With identical, fully text-only timing, a duration-only baseline (averaged sounds) reaches
-> **36.4 % WER**, while a neural decoder reaches **3.2 %**, close to real recordings (**2.0 %**).
-> Explicit duration and pause models also beat the neural model's own timing (**3.2 % vs 5.5 % WER**).
+> **36.6 % WER**, while a neural decoder driven by our predicted durations and pauses reaches **3.1 %**, close to
+> real recordings (**2.0 %**). Our explicit timing also beats the neural model's own: **3.1 % vs 5.3 % WER**
+> at the **same naturalness** (UTMOS 3.70 vs 3.74, difference not significant).
 > Alignment decides *when*; learned acoustics decide *how it sounds*.
-
 ---
 
 ## Pipeline
@@ -35,7 +35,7 @@ text ──► phonemes (MFA pronunciations)
 | Duration predictor | LightGBM regressor on phone, neighbours, stress, position, pause context | AML |
 | Pause classifier | LightGBM classifier on punctuation, word identity, phrase length | AML |
 | Baseline acoustics | one averaged mel frame per phoneme, repeated for its duration | AML only |
-| Neural acoustics | SpeechBrain FastSpeech2 decoder conditioned on our durations, then fine-tuned | DL |
+| Neural acoustics | SpeechBrain FastSpeech2 decoder conditioned on our durations (pretrained and fine-tuned) | DL |
 | Vocoder | SpeechBrain HiFi-GAN (LJSpeech) | DL (shared by all systems) |
 
 ## Systems compared
@@ -59,28 +59,35 @@ Brackets are 95 % bootstrap confidence intervals (resampling sentences, 5,000 dr
 
 ### Intelligibility (WER from a held-out ASR, Whisper `small.en`) and naturalness (UTMOS)
 
-| System | WER | UTMOS (1-5) |
-|---|---|---|
-| original recording | 2.0 % [1.2, 3.0] | 4.37 |
-| ceiling (real mel → vocoder) | 2.2 % [1.4, 3.0] | 4.08 |
-| **hybrid_text_ft** (text-only, fine-tuned) | **3.2 %** [2.1, 4.5] | 3.26 |
-| hybrid_pred_ft | 3.3 % [2.1, 4.5] | |
-| hybrid_true_ft | 3.2 % [2.2, 4.3] | 3.20 |
-| fastspeech2_ft (own durations) | 5.5 % [3.9, 7.4] | 3.31 |
-| hybrid_text (pretrained decoder) | 3.1 % [2.0, 4.3] | |
-| hybrid_true (pretrained decoder) | 4.3 % [3.0, 5.7] | |
-| fastspeech2 (pretrained decoder) | 5.3 % [3.8, 7.1] | |
-| baseline_text | 36.4 % [32.1, 41.0] | 1.24 |
-| baseline_true / baseline_pred | 36.8 % / 36.6 % | |
+| System | Decoder | WER | UTMOS (1-5) |
+|---|---|---|---|
+| original recording | | 2.0 % [1.2, 3.0] | 4.37 |
+| ceiling (real mel → vocoder) | | 2.2 % [1.4, 3.0] | 4.08 |
+| **hybrid_text (ours, fully text-only)** | pretrained | **3.1 %** [2.0, 4.3] | **3.70** |
+| hybrid_pred | pretrained | 2.9 % [1.9, 4.1] | |
+| hybrid_true | pretrained | 4.2 % [3.0, 5.7] | |
+| fastspeech2 (own durations) | pretrained | 5.3 % [3.8, 7.1] | 3.74 |
+| hybrid_text_ft | fine-tuned | 3.6 % [2.5, 5.0] | 3.27 |
+| hybrid_pred_ft | fine-tuned | 3.3 % [2.1, 4.6] | |
+| hybrid_true_ft | fine-tuned | 2.8 % [1.9, 3.8] | 3.17 |
+| fastspeech2_ft | fine-tuned | 5.5 % [4.0, 7.4] | 3.28 |
+| baseline_text | averaged mels | 36.6 % [32.3, 41.1] | 1.24 |
+| baseline_true / baseline_pred | averaged mels | 37.1 % / 36.1 % | |
 
-**Paired comparisons (difference in WER, 95 % CI):**
+**Paired comparisons on the same sentences (95 % CI):**
 
-| Comparison | Δ WER | Conclusion |
+| Comparison | Difference | Conclusion |
 |---|---|---|
-| hybrid_text − baseline_text | [−37.7, −29.2] pts | learned acoustics are essential |
-| hybrid_text_ft − fastspeech2_ft | [−3.4, −1.3] pts | explicit durations beat the neural model's own |
-| hybrid_true_ft − hybrid_true | [−2.2, −0.1] pts | fine-tuning fixes raw-alignment timing (see below) |
-| hybrid_text_ft − fastspeech2_ft (UTMOS) | [−0.10, −0.01] | FastSpeech2 very slightly more natural |
+| hybrid_text − baseline_text, WER | [−37.9, −29.4] pts | learned acoustics are essential |
+| hybrid_text − fastspeech2, WER | [−3.6, −0.9] pts | our explicit timing beats the neural model's own |
+| hybrid_text − fastspeech2, UTMOS | −0.03 [−0.09, +0.03] | same naturalness (not significant) |
+| hybrid_true_ft − hybrid_true, WER | [−2.5, −0.6] pts | fine-tuning fixes the raw-alignment penalty |
+| hybrid_text_ft − hybrid_text, UTMOS | −0.43 [−0.48, −0.38] | fine-tuning makes speech less natural |
+| hybrid_text_ft − hybrid_text, WER | [+0.1, +1.2] pts | … and slightly less intelligible |
+
+![WER](results/figures/wer.png)
+![Intelligibility vs naturalness](results/figures/wer_vs_utmos.png)
+![Spectrograms](results/figures/spectrograms.png)
 
 ### AML models (our test split, 1,310 sentences)
 
@@ -90,6 +97,8 @@ Brackets are 95 % bootstrap confidence intervals (resampling sentences, 5,000 dr
 | **LightGBM** | **21.6 ms** | **18.3 ms** | **112.9 ms** |
 
 On the leak-free sentences with identical tokens: LightGBM **17.8 ms** vs FastSpeech2's own predictor **23.2 ms**.
+
+![Duration MAE](results/figures/duration_mae.png)
 
 | Pause placement (gaps with silence ≥ 100 ms, 9.2 % of gaps) | Precision | Recall | F1 |
 |---|---|---|---|
@@ -104,15 +113,20 @@ Blind A/B test, 7 listeners × 10 sentences, random A/B order. The neural system
 *Note: this test used an earlier neural system, before an input-format bug was fixed (see Findings).
 The final systems are more intelligible still, so this preference is a conservative lower bound.*
 
+Audio: `samples/<sentence>/` has the original recording and each system for 5 test sentences.
+
 ## Findings worth reading
 
 1. **Timing is not the bottleneck for the baseline.** All three baselines sit at ~36.5 % WER whatever the
    timing source; averaged frames lose pitch (harmonics blur when averaging across pitches) and coarticulation.
-2. **Fine-tuning confirmed a hypothesis.** Raw MFA timing hurt the pretrained decoder (4.3 % WER) more than
-   predicted timing (2.9 %). MFA produces 15× more ultra-short phonemes (≤ 2 frames: 3.0 % vs 0.2 %).
-   Fine-tuning the decoder on our MFA durations removed the gap (4.3 % → 3.2 %). Dev mel L1 fell 0.754 → 0.611.
-3. **Intelligibility ≠ naturalness.** The best system is within ~1 point of real speech in WER but ~0.8 below the
-   vocoder ceiling in UTMOS: over-smoothing, the problem diffusion decoders (Grad-TTS) are designed to address.
+2. **Fine-tuning: lower loss, worse sound.** Raw MFA timing hurt the pretrained decoder (4.2 % WER vs 2.9 % with
+   predicted timing); MFA produces 15× more ultra-short phonemes (≤ 2 frames: 3.0 % vs 0.2 %). Fine-tuning the decoder
+   on our MFA durations confirmed this hypothesis (4.2 % → 2.8 %) and lowered dev mel L1 from 0.754 to 0.617, **but
+   reduced naturalness by ~0.43 UTMOS for every system** and slightly raised the text-only WER (3.1 % → 3.6 %).
+   Minimising an average (L1) error pulls outputs towards an average spectrogram: over-smoothing. The best system is
+   therefore the **pretrained decoder driven by our durations** (`hybrid_text`).
+3. **Intelligibility ≠ naturalness.** The best system is ~1 point from real speech in WER but 0.38 UTMOS below the
+   vocoder ceiling (3.70 vs 4.08): the remaining gap is naturalness, which is what diffusion decoders (Grad-TTS) target.
 4. **Readers pause where there is no comma.** Only ~56 % of long pauses (> 200 ms) follow punctuation.
 5. **Verify input formats against the model vocabulary.** The SpeechBrain FastSpeech2 vocabulary has no
    word-boundary token. Feeding `" "` (as in its model card) silently became `<unk>` and inflated its WER from
