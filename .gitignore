@@ -1,0 +1,30 @@
+# data and large artifacts (downloaded, regenerated, or attached to GitHub Releases - not in git)
+work/
+LJSpeech-1.1/
+*.tar.bz2
+*.tar
+*.zip
+mels/
+LJ_aligned/
+pretrained/
+*.npy
+*.pt
+*.pkl
+*.ckpt
+*.TextGrid
+ljspeech_prepare.py
+outputs/
+outputs.zip
+
+# audio: only the small curated samples are committed
+*.wav
+!samples/**/*.wav
+
+# raw form export may contain personal data - never commit
+*Form_Responses*.csv
+
+# python / notebooks
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store

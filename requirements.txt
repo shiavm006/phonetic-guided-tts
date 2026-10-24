@@ -1,0 +1,16 @@
+# Tested on Google Colab (Python 3.13, CUDA GPU T4). MFA is installed separately via conda (see notebook Part A).
+torch
+torchaudio
+speechbrain
+lightgbm
+scikit-learn
+pandas
+numpy
+soundfile
+textgrid
+openai-whisper
+jiwer
+pyyaml
+joblib
+tqdm
+matplotlib
