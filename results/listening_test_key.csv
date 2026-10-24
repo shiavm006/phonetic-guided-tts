@@ -1,0 +1,21 @@
+sentence,utt,label,system,words,text
+1,LJ001-0104,A,fastspeech2,4,Italy is contentedly stagnant.
+1,LJ001-0104,B,baseline_pred,4,Italy is contentedly stagnant.
+2,LJ003-0182,A,baseline_pred,11,"The tried and the untried, young and old, were herded together"
+2,LJ003-0182,B,fastspeech2,11,"The tried and the untried, young and old, were herded together"
+3,LJ002-0245,A,fastspeech2,13,"The prison was a nest of abuses, like its neighbor the King's Bench"
+3,LJ002-0245,B,baseline_pred,13,"The prison was a nest of abuses, like its neighbor the King's Bench"
+4,LJ002-0173,A,baseline_pred,15,The lad was proved to be of good character and the son of respectable parents.
+4,LJ002-0173,B,fastspeech2,15,The lad was proved to be of good character and the son of respectable parents.
+5,LJ001-0048,A,baseline_pred,17,"his letter is admirably clear and regular, but at least as beautiful as any other Roman type."
+5,LJ001-0048,B,fastspeech2,17,"his letter is admirably clear and regular, but at least as beautiful as any other Roman type."
+6,LJ001-0071,A,baseline_pred,19,"Most of Caxton's own types are of an earlier character, though they also much resemble Flemish or Cologne letter."
+6,LJ001-0071,B,fastspeech2,19,"Most of Caxton's own types are of an earlier character, though they also much resemble Flemish or Cologne letter."
+7,LJ002-0277,A,fastspeech2,20,"There were fifteen rooms of various sizes, and as the numbers imprisoned rarely exceeded five-and-twenty, the place was never overcrowded,"
+7,LJ002-0277,B,baseline_pred,20,"There were fifteen rooms of various sizes, and as the numbers imprisoned rarely exceeded five-and-twenty, the place was never overcrowded,"
+8,LJ001-0100,A,baseline_pred,22,"and these somewhat wiry letters are suitable for the machine process, which would not do justice to letters of more generous design."
+8,LJ001-0100,B,fastspeech2,22,"and these somewhat wiry letters are suitable for the machine process, which would not do justice to letters of more generous design."
+9,LJ003-0274,A,baseline_pred,23,"""that there is no place in the metropolis where more crimes are projected or where stolen property is more secreted than in Newgate."""
+9,LJ003-0274,B,fastspeech2,23,"""that there is no place in the metropolis where more crimes are projected or where stolen property is more secreted than in Newgate."""
+10,LJ003-0011,A,baseline_pred,32,"that not more than one bottle of wine or one quart of beer could be issued at one time. No account was taken of the amount of liquors admitted in one day,"
+10,LJ003-0011,B,fastspeech2,32,"that not more than one bottle of wine or one quart of beer could be issued at one time. No account was taken of the amount of liquors admitted in one day,"

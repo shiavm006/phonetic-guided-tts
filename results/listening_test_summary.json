@@ -1,0 +1,15 @@
+{
+  "n_raters": 7,
+  "n_judgements": 70,
+  "preferred_fastspeech2": 67,
+  "preferred_baseline_pred": 0,
+  "ties": 3,
+  "mean_score_fastspeech2": 4.114285714285714,
+  "mean_score_baseline_pred": 1.6857142857142857,
+  "score_diff": "fastspeech2 - baseline_pred",
+  "score_diff_mean": 2.4285714285714284,
+  "score_diff_ci": [
+    1.5571428571428572,
+    3.057142857142857
+  ]
+}
