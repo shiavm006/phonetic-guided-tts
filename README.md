@@ -2,6 +2,8 @@
 
 **Explicit phoneme alignment (AML) + learned acoustic generation (DL) for text-to-speech on LJSpeech**
 
+📄 [Report (PDF)](docs/report.pdf) · 📊 [Slides (PDF)](docs/presentation.pdf) · 🔊 [Audio samples](samples/) · 📦 [Release v1.0](../../releases)
+
 A small, fully reproducible TTS experiment that asks one question: *if you know exactly **when** every
 phoneme happens, how much of good speech do you get for free, and how much needs a learned acoustic model?*
 
@@ -130,11 +132,12 @@ Audio: `samples/<sentence>/` has the original recording and each system for 5 te
 4. **Readers pause where there is no comma.** Only ~56 % of long pauses (> 200 ms) follow punctuation.
 5. **Verify input formats against the model vocabulary.** The SpeechBrain FastSpeech2 vocabulary has no
    word-boundary token. Feeding `" "` (as in its model card) silently became `<unk>` and inflated its WER from
-   ~5 % to ~21 %. All reported numbers use the corrected format (`spn` for pauses, no separators).
+   6.9 % to 20.8 % on our initial test set. All reported numbers use the corrected format (`spn` for pauses, no separators).
 
 ## Repository layout
 
 ```
+docs/                       report and presentation (PDF)
 phonetic_guided_tts.ipynb   the whole project: data → alignment → AML models → fine-tuning → synthesis → evaluation → figures
 results/                    metrics, splits, transcripts, figures, listening-test data (anonymised)
 samples/                    a few sentences rendered by each system (.wav)
@@ -176,6 +179,15 @@ Re-running reproduces the results up to small differences (e.g. averaged mels ar
   estimate, not a substitute for listeners).
 * 100 evaluation sentences; differences of ~1 WER point are near the limit of what this test can resolve.
 
+## Scope: why no diffusion model
+
+The brief lists a diffusion decoder as an optional extension after a working baseline. We prioritised a strong
+explicit-timing baseline, a neural decoder driven by that timing, a leak-free test set and paired statistics.
+The results make the case for diffusion concrete: the text-only hybrid is within ~1 WER point of real speech, but
+0.38 UTMOS below the vocoder ceiling, and fine-tuning the regression decoder lowered its loss by 18 % while reducing
+naturalness by 0.43: the over-smoothing that diffusion decoders such as Grad-TTS are designed to avoid. Grad-TTS also
+expands its encoder output by phoneme durations, so our duration and pause models could drive it unchanged.
+
 ## Future work
 
 Diffusion decoder (Grad-TTS) to close the naturalness gap; G2P for unseen words; a human MOS study on the final
@@ -191,4 +203,15 @@ systems; multi-speaker extension (VCTK).
 * **Evaluation:** [OpenAI Whisper](https://github.com/openai/whisper), [jiwer](https://github.com/jitsi/jiwer),
   [UTMOS / SpeechMOS](https://github.com/tarepan/SpeechMOS)
 
-Course project (Advanced Machine Learning / Deep Learning), Newton School of Technology. Team: *add names*.
+## Team
+
+| Member | Contribution |
+|---|---|
+| Shivam Mittal | Project lead: hypotheses, system design, hybrid system, leak-free evaluation design, repository and notebook |
+| Divya Singh | Data and AML models: LJSpeech preparation, forced alignment, duration predictor, pause classifier |
+| Sanath Waraikar | DL and synthesis: averaged-mel baseline, FastSpeech2/HiFi-GAN integration, decoder fine-tuning, spectrogram analysis |
+| Aryan | Evaluation: Whisper WER, UTMOS, bootstrap CIs, listening test, failure analysis, figures |
+| Khushi Batra | Literature review, proofreading of report and presentation |
+
+Course project for Advanced Machine Learning and Deep Learning, Newton School of Technology, Rishihood University.
+Report and slides: see the project submission.
