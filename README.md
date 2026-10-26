@@ -107,6 +107,29 @@ On the leak-free sentences with identical tokens: LightGBM **17.8 ms** vs FastSp
 | rule: pause iff punctuation | 68.2 % | 51.5 % | 58.7 % |
 | **LightGBM classifier** | 68.2 % | **60.6 %** | **64.2 %** |
 
+### AML model comparison (`aml_model_comparison.ipynb`, CPU only)
+
+| Duration model | MAE, speech | Gap to LightGBM (95% CI) |
+|---|---|---|
+| Per-phoneme mean | 28.8 ms | +11.2 to +11.5 ms |
+| Ridge regression (linear) | 25.1 ms | +7.5 to +7.8 ms |
+| MLP (128-64)* | 19.3 ms | +1.0 to +1.2 ms |
+| Random forest* | 18.8 ms | +0.6 to +0.8 ms |
+| **LightGBM** | **18.3 ms** | best |
+
+| Pause model | Precision | Recall | F1 |
+|---|---|---|---|
+| Rule: pause iff punctuation | 68.2 % | 51.5 % | 58.7 % |
+| Logistic regression | 61.0 % | 61.2 % | 61.1 % |
+| Random forest | 68.4 % | 58.4 % | 63.0 % |
+| MLP (64-32) | 66.4 % | 60.7 % | 63.5 % |
+| **LightGBM** | 68.2 % | 60.6 % | **64.2 %** |
+
+\* trained on a 200k-row subsample for CPU time. Linear models are 7.7 ms worse: duration depends on feature
+interactions. Ablation (LightGBM retrained without each group): neighbouring phonemes +5.7 ms, phoneme identity
++5.0 ms, position +1.2 ms, stress +0.3 ms, following pause +0.0 ms (redundant with the next-phoneme feature).
+Cross-validated tuning: 127 leaves beat our 63 by 0.3 ms, small next to model choice.
+
 ### Human listening test
 
 Blind A/B test, 7 listeners × 10 sentences, random A/B order. The neural system was preferred in
@@ -138,6 +161,7 @@ Audio: `samples/<sentence>/` has the original recording and each system for 5 te
 
 ```
 docs/                       report and presentation (PDF)
+aml_model_comparison.ipynb  AML model comparison, tuning, ablation (CPU, ~45 min)
 phonetic_guided_tts.ipynb   the whole project: data → alignment → AML models → fine-tuning → synthesis → evaluation → figures
 results/                    metrics, splits, transcripts, figures, listening-test data (anonymised)
 samples/                    a few sentences rendered by each system (.wav)
